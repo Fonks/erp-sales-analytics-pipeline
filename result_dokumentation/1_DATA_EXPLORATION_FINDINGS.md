@@ -1,8 +1,8 @@
 # 📊 Data Exploration & Quality Analysis - Findings Report
 
 **Project:** ERP Sales Analytics Pipeline  
-**Date:** November 3, 2025  
-**Analyst:** [Your Name]  
+**Date:** October 29, 2025  
+**Analyst:** Phuong Minh Nguyen
 **Notebook:** `01_data_exploration.ipynb`
 
 ---
