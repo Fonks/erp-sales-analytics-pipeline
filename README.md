@@ -114,3 +114,13 @@ docker-compose exec dashboard streamlit run dashboard/app.py
 Das Dashboard ist unter **http://localhost:8501** verfügbar.
 
 
+
+## 👤 Author
+
+**Phuong Minh Nguyen**
+Hi! Do you have any feedback or questions? Feel free to add and contact me :) Always happy to share knowledge among self-taught enthusiasts! <3 
+- 💼 LinkedIn: [Phuong Minh Nguyen]([https://linkedin.com/in/yourprofile](https://www.linkedin.com/in/phuong-minh-nguyen-30b92b1a3/))
+- 🐙 GitHub: [@Fonks]([https://github.com/YourUsername](https://github.com/Fonks))
+- 📧 Email: phuongminhnguyenmails@gmail.com
+
+
