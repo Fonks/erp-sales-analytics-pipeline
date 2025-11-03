@@ -1,0 +1,98 @@
+# ============================================================================
+# ERP Sales Analytics - Docker Compose Configuration
+# ============================================================================
+
+version: '3.8'
+
+services:
+  # ====================================================================
+  # PySpark Service - For ETL Pipeline & Data Processing
+  # ====================================================================
+  spark:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: erp-spark
+    hostname: spark-master
+    
+    environment:
+      - SPARK_MODE=master
+      - SPARK_MASTER_HOST=spark-master
+      - SPARK_MASTER_PORT=7077
+      - SPARK_MASTER_WEBUI_PORT=8080
+      - PYSPARK_PYTHON=python3
+      - PYSPARK_DRIVER_PYTHON=python3
+    
+    ports:
+      - "8080:8080"   # Spark Master Web UI
+      - "7077:7077"   # Spark Master Port
+      - "4040:4040"   # Spark Application UI
+    
+    volumes:
+      # Mount project directory
+      - ./data:/app/data
+      - ./src:/app/src
+      - ./notebooks:/app/notebooks
+      - ./contracts:/app/contracts
+      - ./tests:/app/tests
+    
+    networks:
+      - erp-network
+    
+    # Keep container running
+    command: tail -f /dev/null
+
+  # ====================================================================
+  # Streamlit Service - For Analytics Dashboard
+  # ====================================================================
+  dashboard:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: erp-dashboard
+    
+    depends_on:
+      - spark
+    
+    environment:
+      - STREAMLIT_SERVER_PORT=8501
+      - STREAMLIT_SERVER_ADDRESS=0.0.0.0
+      - STREAMLIT_SERVER_HEADLESS=true
+    
+    ports:
+      - "8501:8501"   # Streamlit Web Interface
+    
+    volumes:
+      # Mount project directory
+      - ./data:/app/data
+      - ./dashboard:/app/dashboard
+      - ./src:/app/src
+    
+    networks:
+      - erp-network
+    
+    # Start Streamlit on container start
+    command: streamlit run dashboard/app.py
+    
+    # Health check
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8501/_stcore/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+# ====================================================================
+# Networks
+# ====================================================================
+networks:
+  erp-network:
+    driver: bridge
+    name: erp-analytics-network
+
+# ====================================================================
+# Volumes (optional: for persistent data)
+# ====================================================================
+volumes:
+  spark-data:
+    name: erp-spark-data
