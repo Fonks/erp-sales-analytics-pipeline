@@ -63,48 +63,9 @@ Umwandlung unübersichtlicher, realer E-Commerce-Daten in eine zuverlässige Ana
 - ✅ **Duplikaterkennung** mit Analyse zusammengesetzter Schlüssel
 - ✅ **Automatisierte Qualitätsberichte** (HTML/JSON-Ausgaben)
 
-Übersetzt mit DeepL.com (kostenlose Version)
 
-## 🏗️ Architektur┌─────────────────────────────────────────────────────────────────┐
-│                         DATA SOURCES                             │
-│  📦 Sales    👥 Customers    🏷️ Products    🔄 Returns          │
-└───────────────────────────┬─────────────────────────────────────┘
-                            │
-                            ▼
-┌─────────────────────────────────────────────────────────────────┐
-│                    DATA QUALITY LAYER                            │
-│  ✓ Schema Validation  ✓ Deduplication  ✓ Null Handling         │
-│  ✓ Business Rules     ✓ NLP Extraction ✓ Type Conversion       │
-└───────────────────────────┬─────────────────────────────────────┘
-                            │
-                            ▼
-┌─────────────────────────────────────────────────────────────────┐
-│                   ETL PIPELINE (PySpark)                         │
-│  🔄 Incremental Load  →  🏗️ Star Schema  →  💾 Delta Lake      │
-└───────────────────────────┬─────────────────────────────────────┘
-                            │
-                            ▼
-┌─────────────────────────────────────────────────────────────────┐
-│                    DATA WAREHOUSE (Star Schema)                  │
-│                                                                  │
-│         ┌──────────────┐                                        │
-│         │  dim_date    │◄─────┐                                 │
-│         └──────────────┘      │                                 │
-│                               │                                 │
-│  ┌──────────────┐      ┌─────┴──────┐      ┌──────────────┐   │
-│  │ dim_customer │◄─────┤ fact_sales │─────►│ dim_product  │   │
-│  └──────────────┘      └─────┬──────┘      └──────────────┘   │
-│                               │                                 │
-│         ┌──────────────┐      │                                 │
-│         │ dim_channel  │◄─────┘                                 │
-│         └──────────────┘                                        │
-└───────────────────────────┬─────────────────────────────────────┘
-                            │
-                            ▼
-┌─────────────────────────────────────────────────────────────────┐
-│                  ANALYTICS DASHBOARD (Streamlit)                 │
-│  📊 Revenue Analysis  │  📦 Returns  │  👥 Customers  │  🏆 Top │
-└─────────────────────────────────────────────────────────────────┘
+## 🏗️ Architektur
+<img width="648" height="1007" alt="grafik" src="https://github.com/user-attachments/assets/d8ee9f48-9027-4609-b207-3a81fd0eda74" />
 
 
 
