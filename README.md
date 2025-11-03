@@ -1,8 +1,31 @@
 # ERP Sales Analytics Platform
 
-## 🎯 Projekt-Übersicht
-End-to-End Data Engineering Pipeline für E-Commerce Sales Analytics
-mit Data Quality Checks, Star Schema Modellierung und Interactive Dashboard.
+## 🎯 Projektübersicht
+
+Dieses Projekt demonstriert einen vollständigen **Data-Engineering-Workflow** für ein E-Commerce-Unternehmen (Shoebadoo) und umfasst:
+
+1. **Datenaufnahme** → Roh-Parquet-Dateien (Verkäufe, Kunden, Produkte, Rücksendungen)
+2. **Datenqualität und -bereinigung** → Automatisierte Validierung, Deduplizierung und NLP-basierte Anreicherung
+3. **Datenmodellierung** → Sternschema (Kimball-Methodik) mit Delta Lake
+4. **Analyse und Visualisierung** → Interaktives Streamlit-Dashboard mit geschäftlichen KPIs
+
+**Problemstellung:**  
+Umwandlung unübersichtlicher, realer E-Commerce-Daten in eine zuverlässige Analyseplattform, die datengestützte Entscheidungen über Vertriebskanäle, Produktleistung und Kundenverhalten ermöglicht.
+
+## 📋 Inhaltsverzeichnis
+
+- [Projektübersicht](#-project-overview)
+- [Wichtigste Funktionen](#-key-features)
+- [Tech Stack](#-tech-stack)
+- [Architektur](#-architecture)
+- [Anwendungsfälle in der Wirtschaft](#-business-use-cases)
+- [Projektstruktur](#-project-structure)
+- [Erste Schritte](#-getting-started)
+- [Datenpipeline](#-data-pipeline)
+- [Dashboard-Vorschau](#-dashboard-preview)
+- [Wichtigste Erkenntnisse](#-key-learnings)
+- [Zukünftige Verbesserungen](#-future-enhancements)
+
 
 ## 🛠️ Tech Stack
 - **Data Processing:** PySpark, Pandas, Dask
@@ -11,29 +34,122 @@ mit Data Quality Checks, Star Schema Modellierung und Interactive Dashboard.
 - **Visualization:** Streamlit, Plotly
 - **Infrastructure:** Docker, Docker Compose
 
-## 📊 Features
-✅ Inkrementelle ETL Pipeline 
-    - "Frische" Daten werden dem Data Lakehouse geordnet hinzugefügt
-✅ Automated Data Quality Checks and Data-Cleaning
-    - Null-Werte, Duplikate und ungültige Werte(negative Preise z.B)
-    - sind alle Preisbeträge numerisch? -> Datentyp-Prüfunng
-    - Automatisches einfügen von fehlenden Strings durch Freitext
-✅ Star Schema (Kimball Methodology)
-✅ Real-time Analytics Dashboard
-✅ Data Anonymization
-✅ Data Contract Validation
 
-## 🏗️ Architektur
-[Star Schema Diagramm hier]
+## ✨ Hauptmerkmale
 
-## 🚀 Quick Start
+### 🔄 **Datenverarbeitung**
+- ✅ **Inkrementelle ETL-Pipeline** mit PySpark & Delta Lake
+- ✅ **Automatisierte Datenqualitätsprüfungen** (Great Expectations)
+- ✅ **Validierung von Datenverträgen** (JSON-Schema)
+- ✅ **NLP-basierte Datenanreicherung** (Extrahieren von Kategorien/Marken aus Freitext)
+- ✅ **Imputation fehlender Werte** mit intelligenten Standardwerten
+
+### 🏗️ **Datenarchitektur**
+- ✅ **Star-Schema-Modellierung** (1 Faktentabelle + 4 Dimensionstabellen)
+- ✅ **Langsam veränderliche Dimensionen** (SCD Typ 2-fähig)
+- ✅ **Durchsetzung der referenziellen Integrität**
+- ✅ **Delta Lake Storage** für ACID-Transaktionen
+
+### 📊 **Analytik-Dashboard**
+- ✅ **Echtzeit-KPI-Überwachung** (Umsatz, Renditen, Kundenwachstum)
+- ✅ **Mehrdimensionale Analyse** (Kanal, Produkt, Zeit, Kundensegment)
+- ✅ **Interaktive Visualisierungen** (Plotly-Diagramme mit Filtern)
+- ✅ **Drilldown-Funktionen** für detaillierte Einblicke
+
+### 🛡️ **Datenqualitäts-Framework**
+- ✅ **Schema-Validierung** (Pflichtfelder, Datentypen)
+- ✅ **Überprüfung von Geschäftsregeln** (Preis > 0, Menge > 0)
+- ✅ **Referenzielle Integrität** (Validierung von Fremdschlüsseln)
+- ✅ **Duplikaterkennung** mit Analyse zusammengesetzter Schlüssel
+- ✅ **Automatisierte Qualitätsberichte** (HTML/JSON-Ausgaben)
+
+Übersetzt mit DeepL.com (kostenlose Version)
+
+## 🏗️ Architektur┌─────────────────────────────────────────────────────────────────┐
+│                         DATA SOURCES                             │
+│  📦 Sales    👥 Customers    🏷️ Products    🔄 Returns          │
+└───────────────────────────┬─────────────────────────────────────┘
+                            │
+                            ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                    DATA QUALITY LAYER                            │
+│  ✓ Schema Validation  ✓ Deduplication  ✓ Null Handling         │
+│  ✓ Business Rules     ✓ NLP Extraction ✓ Type Conversion       │
+└───────────────────────────┬─────────────────────────────────────┘
+                            │
+                            ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                   ETL PIPELINE (PySpark)                         │
+│  🔄 Incremental Load  →  🏗️ Star Schema  →  💾 Delta Lake      │
+└───────────────────────────┬─────────────────────────────────────┘
+                            │
+                            ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                    DATA WAREHOUSE (Star Schema)                  │
+│                                                                  │
+│         ┌──────────────┐                                        │
+│         │  dim_date    │◄─────┐                                 │
+│         └──────────────┘      │                                 │
+│                               │                                 │
+│  ┌──────────────┐      ┌─────┴──────┐      ┌──────────────┐   │
+│  │ dim_customer │◄─────┤ fact_sales │─────►│ dim_product  │   │
+│  └──────────────┘      └─────┬──────┘      └──────────────┘   │
+│                               │                                 │
+│         ┌──────────────┐      │                                 │
+│         │ dim_channel  │◄─────┘                                 │
+│         └──────────────┘                                        │
+└───────────────────────────┬─────────────────────────────────────┘
+                            │
+                            ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                  ANALYTICS DASHBOARD (Streamlit)                 │
+│  📊 Revenue Analysis  │  📦 Returns  │  👥 Customers  │  🏆 Top │
+└─────────────────────────────────────────────────────────────────┘
+
+
+
+## 💼 Anwendungsfälle für Unternehmen
+
+Diese Analyseplattform beantwortet wichtige geschäftliche Fragen:
+
+| Frage | Lösung |
+|----------|----------|
+| **Welcher Vertriebskanal generiert den meisten Umsatz?** | Mehrdimensionale Umsatzanalyse nach Kanal, Zeit und Produkt |
+| **Wie hoch ist unsere Rücklaufquote nach Produktkategorie?** | Überwachung der Rücklaufquote mit Drilldown nach Produkt/Kanal/Zeit |
+| **Wie viele Neukunden gewinnen wir monatlich?** | Kundenkohortenanalyse mit Wachstumstrends |
+| **Welche Produkte sind unsere Top-Seller?** | Produktrankings nach Umsatz, verkaufter Menge und Rücklaufquote |
+| **Gibt es Probleme mit der Datenqualität in unseren Verkaufsdaten?** | Automatisierte Qualitätsprüfungen mit detaillierten Berichten zu Verstößen |
+
+
+
+## 🚀 Erste Schritte
+
+### Voraussetzungen
+
+- Docker & Docker Compose
+- Git
+- 8 GB+ RAM empfohlen
+
+### Schnellstart (5 Minuten)
+
 ```bash
-docker-compose up
-streamlit run dashboards/streamlit_app.py
+# 1. Klonen Sie das Repository.
+git clone https://github.com/YOUR_USERNAME/erp-sales-analytics.git
+cd erp-sales-analytics
+
+# 2. Legen Sie Ihre Datendateien in data/raw/ ab.
+# Erforderliche Dateien: customers.parquet, products.parquet, sales.parquet, returns.parquet
+
+# 3. Starten Sie die Docker-Container.
+docker-compose up -d
+
+# 4. Führen Sie die ETL-Pipeline aus.
+docker-compose exec spark python src/etl/pipeline.py
+
+# 5. Starten Sie das Dashboard.
+docker-compose exec dashboard streamlit run dashboard/app.py
 ```
 
-## 📈 Use Cases
-- Revenue Analysis by Channel/Product/Time
-- Return Rate Monitoring
-- Customer Segmentation
-- Top Product Rankings
+Das Dashboard ist unter **http://localhost:8501** verfügbar.
+
+
