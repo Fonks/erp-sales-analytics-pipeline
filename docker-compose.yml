@@ -25,6 +25,7 @@ services:
       - "8080:8080"   # Spark Master Web UI
       - "7077:7077"   # Spark Master Port
       - "4040:4040"   # Spark Application UI
+      - "8888:8888"   # Jupyter Notebook
     
     volumes:
       # Mount project directory
