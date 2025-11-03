@@ -2,8 +2,6 @@
 # ERP Sales Analytics - Docker Compose Configuration
 # ============================================================================
 
-version: '3.8'
-
 services:
   # ====================================================================
   # PySpark Service - For ETL Pipeline & Data Processing

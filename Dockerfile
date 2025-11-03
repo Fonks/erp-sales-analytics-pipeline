@@ -1,25 +1,27 @@
 # ============================================================================
 # ERP Sales Analytics - Docker Image
-# Base: Apache Spark with Python 3.11
+# Base: Python 3.11 with PySpark
 # ============================================================================
 
-FROM apache/spark-py:3.5.0
+FROM python:3.11-slim
 
 # Set environment variables
 ENV PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \
-    SPARK_HOME=/opt/spark \
     PYSPARK_PYTHON=python3 \
     PYSPARK_DRIVER_PYTHON=python3
 
-# Install system dependencies
-USER root
-
+# Install system dependencies (Java for PySpark)
 RUN apt-get update && apt-get install -y \
+    default-jdk \
     build-essential \
     curl \
     git \
+    procps \
     && rm -rf /var/lib/apt/lists/*
+
+# Set JAVA_HOME after installation
+ENV JAVA_HOME=/usr/lib/jvm/default-java
 
 # Set working directory
 WORKDIR /app
