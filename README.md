@@ -34,6 +34,26 @@ Umwandlung unübersichtlicher, realer E-Commerce-Daten in eine zuverlässige Ana
 - **Visualization:** Streamlit, Plotly
 - **Infrastructure:** Docker, Docker Compose
 
+## 🛠️ Technical Highlights
+
+### Warum PySpark?
+
+Dieses Projekt verwendet **Apache Spark (PySpark)** für die Datenverarbeitung, um Folgendes zu demonstrieren:
+
+- ✅ **Skalierbarkeit:** Architektur, die für wachsende Datenmengen ausgelegt ist
+- ✅ **Verteiltes Rechnen:** Parallele Verarbeitungsmöglichkeiten für große Datensätze
+- ✅ **Industriestandard:** PySpark wird häufig in Produktionsdatenpipelines verwendet
+- ✅ **Big-Data-Kenntnisse:** Demonstriert die Beherrschung von Tools der Enterprise-Klasse
+
+**Aktuelle Datensatzgröße:** Über 437.000 Verkaufsdatensätze, 500 Produkte, 8.000 Kunden  
+**Produktionsreif:** Die Architektur kann ohne Codeänderungen auf Millionen von Datensätzen skaliert werden
+
+**Technologien:**
+- PySpark 3.5 für die verteilte Datenverarbeitung
+- Delta Lake für ACID-Transaktionen
+- Pandas für Datenkonvertierung und Kompatibilität
+
+
 
 ## ✨ Hauptmerkmale
 
