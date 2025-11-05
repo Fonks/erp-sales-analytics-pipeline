@@ -34,6 +34,26 @@ Umwandlung unübersichtlicher, realer E-Commerce-Daten in eine zuverlässige Ana
 - **Visualization:** Streamlit, Plotly
 - **Infrastructure:** Docker, Docker Compose
 
+## 🛠️ Technical Highlights
+
+### Warum PySpark?
+
+Dieses Projekt verwendet **Apache Spark (PySpark)** für die Datenverarbeitung, um Folgendes zu demonstrieren:
+
+- ✅ **Skalierbarkeit:** Architektur, die für wachsende Datenmengen ausgelegt ist
+- ✅ **Verteiltes Rechnen:** Parallele Verarbeitungsmöglichkeiten für große Datensätze
+- ✅ **Industriestandard:** PySpark wird häufig in Produktionsdatenpipelines verwendet
+- ✅ **Big-Data-Kenntnisse:** Demonstriert die Beherrschung von Tools der Enterprise-Klasse
+
+**Aktuelle Datensatzgröße:** Über 437.000 Verkaufsdatensätze, 500 Produkte, 8.000 Kunden  
+**Produktionsreif:** Die Architektur kann ohne Codeänderungen auf Millionen von Datensätzen skaliert werden
+
+**Technologien:**
+- PySpark 3.5 für die verteilte Datenverarbeitung
+- Delta Lake für ACID-Transaktionen
+- Pandas für Datenkonvertierung und Kompatibilität
+
+
 
 ## ✨ Hauptmerkmale
 
@@ -63,7 +83,31 @@ Umwandlung unübersichtlicher, realer E-Commerce-Daten in eine zuverlässige Ana
 - ✅ **Duplikaterkennung** mit Analyse zusammengesetzter Schlüssel
 - ✅ **Automatisierte Qualitätsberichte** (HTML/JSON-Ausgaben)
 
+### Data Quality Strategy
 
+**Missing Value Hierarchy:**
+
+1. **Text Extraction (NLP):**
+   - Extract brand, category from product descriptions
+   - Pattern matching + known entity lists
+   - Success rate: ~80-90%
+
+2. **Statistical Imputation:**
+   - Missing prices: Category average (if category known)
+   - Fallback: Overall average
+   - Preserves data distribution
+
+3. **Flagging (NOT Deletion):**
+   - Remaining unknowns flagged as 'UNKNOWN'
+   - Enables future data enrichment
+   - Maintains referential integrity
+
+**Why not delete?**
+- Preserves transaction history
+- Maintains statistical validity
+- Allows iterative improvement
+
+  
 ## 🏗️ Architektur
 <img width="648" height="1007" alt="grafik" src="https://github.com/user-attachments/assets/d8ee9f48-9027-4609-b207-3a81fd0eda74" />
 
