@@ -12,6 +12,14 @@ Dieses Projekt demonstriert einen vollständigen **Data-Engineering-Workflow** f
 **Problemstellung:**  
 Umwandlung unübersichtlicher, realer E-Commerce-Daten in eine zuverlässige Analyseplattform, die datengestützte Entscheidungen über Vertriebskanäle, Produktleistung und Kundenverhalten ermöglicht.
 
+# Notebooks:
+
+| Notebook | Zweck | Macht |
+|----------|-------|-------|
+| Notebook 1 | EDA | Verstehen, Analysieren |
+| Notebook 2 | Cleaning | Bereinigen, Extrahieren, Speichern |
+| Notebook 3 | Quality | Validieren, Checks, Reports |
+
 ## 📋 Inhaltsverzeichnis
 
 - [Projektübersicht](#-project-overview)
