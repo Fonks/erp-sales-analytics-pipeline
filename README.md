@@ -83,7 +83,31 @@ Dieses Projekt verwendet **Apache Spark (PySpark)** für die Datenverarbeitung, 
 - ✅ **Duplikaterkennung** mit Analyse zusammengesetzter Schlüssel
 - ✅ **Automatisierte Qualitätsberichte** (HTML/JSON-Ausgaben)
 
+### Data Quality Strategy
 
+**Missing Value Hierarchy:**
+
+1. **Text Extraction (NLP):**
+   - Extract brand, category from product descriptions
+   - Pattern matching + known entity lists
+   - Success rate: ~80-90%
+
+2. **Statistical Imputation:**
+   - Missing prices: Category average (if category known)
+   - Fallback: Overall average
+   - Preserves data distribution
+
+3. **Flagging (NOT Deletion):**
+   - Remaining unknowns flagged as 'UNKNOWN'
+   - Enables future data enrichment
+   - Maintains referential integrity
+
+**Why not delete?**
+- Preserves transaction history
+- Maintains statistical validity
+- Allows iterative improvement
+
+  
 ## 🏗️ Architektur
 <img width="648" height="1007" alt="grafik" src="https://github.com/user-attachments/assets/d8ee9f48-9027-4609-b207-3a81fd0eda74" />
 
