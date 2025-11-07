@@ -1,0 +1,20 @@
+{
+    "table": "sales_clean",
+    "description": "Bereinigte Verkaufstabelle mit Kunden- und Produktverknüpfungen.",
+    "columns": {
+      "sale_id": { "type": "string", "nullable": false },
+      "product_id": { "type": "string", "nullable": false },
+      "customer_id": { "type": "string", "nullable": false },
+      "order_date": { "type": "date", "nullable": false },
+      "quantity": { "type": "integer", "nullable": false, "constraints": { "min": 1 } },
+      "total_amount": { "type": "double", "nullable": false, "constraints": { "min": 0.01 } },
+      "payment_method": { "type": "string", "nullable": true }
+    },
+    "rules": [
+      "customer_id NOT NULL",
+      "product_id REFERENCES products_clean(product_id)",
+      "quantity > 0",
+      "total_amount > 0"
+    ]
+  }
+  
