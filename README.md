@@ -6,8 +6,8 @@
 
 | **Was suchst du?** | **Hier lang** |
 |--------------------|---------------|
-| 🎯 Projektübersicht & Tech-Stack | [Über dieses Projekt](#über-dieses-projekt) |
-| 📂 Repository-Struktur erklärt | [Projektstruktur](#projektstruktur) |
+| 🎯 Projektübersicht & Tech-Stack | [Über dieses Projekt](README.md) |
+| 📂 Repository-Struktur erklärt | [#projektstruktur](https://github.com/Fonks/erp-sales-analytics-pipeline/edit/main/README.md#-projektstruktur) |
 | 🗓️ Projekt-Roadmap & Fortschritt | [`01_Projektplan.md`](01_Projektplan.md) |
 | 🔍 Datenexploration & Analyse | [`notebooks/01_data_exploration.ipynb`](notebooks/01_data_exploration.ipynb) |
 | 🧹 Data-Cleaning-Pipeline | [`notebooks/02_data_cleaning.ipynb`](notebooks/02_data_cleaning.ipynb) |
