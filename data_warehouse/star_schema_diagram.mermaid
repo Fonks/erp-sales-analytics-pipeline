@@ -1,0 +1,63 @@
+erDiagram
+    %% Star Schema für Shoebadoo Sales Analytics
+    
+    FACT_SALES {
+        string sale_id PK
+        int date_key FK
+        int customer_key FK
+        int product_key FK
+        int channel_key FK
+        int quantity
+        decimal unit_price
+        decimal total_amount
+        boolean is_returned
+    }
+    
+    DIM_DATE {
+        int date_key PK
+        date full_date
+        int year
+        int quarter
+        int month
+        string month_name
+        int week
+        int day
+        int day_of_week
+        string day_name
+        boolean is_weekend
+    }
+    
+    DIM_CUSTOMER {
+        int customer_key PK
+        string customer_id
+        string customer_name
+        string customer_segment
+        string country
+        string city
+        string postal_code
+        date registration_date
+    }
+    
+    DIM_PRODUCT {
+        int product_key PK
+        string product_id
+        string product_name
+        string category
+        string subcategory
+        string brand
+        decimal price
+        string color
+        string size
+    }
+    
+    DIM_CHANNEL {
+        int channel_key PK
+        string channel_id
+        string channel_name
+        string channel_type
+    }
+    
+    FACT_SALES ||--o{ DIM_DATE : "date_key"
+    FACT_SALES ||--o{ DIM_CUSTOMER : "customer_key"
+    FACT_SALES ||--o{ DIM_PRODUCT : "product_key"
+    FACT_SALES ||--o{ DIM_CHANNEL : "channel_key"
