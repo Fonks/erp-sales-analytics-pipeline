@@ -124,41 +124,75 @@
 ### Frage 1: Umsatz nach Kanal, Produkt, Zeit, Kundensegment
 
 ```sql
-SELECT 
+SELECT
     d.year,
-    d.month_name,
+    d.month,
     ch.channel_name,
-    p.category,
+    p.product_name,
     c.customer_segment,
-    SUM(f.total_amount) as total_revenue,
-    SUM(f.quantity) as total_quantity
-FROM fact_sales f
-JOIN dim_date d ON f.date_key = d.date_key
-JOIN dim_channel ch ON f.channel_key = ch.channel_key
-JOIN dim_product p ON f.product_key = p.product_key
-JOIN dim_customer c ON f.customer_key = c.customer_key
-WHERE d.year = 2024
-GROUP BY d.year, d.month_name, ch.channel_name, p.category, c.customer_segment
-ORDER BY total_revenue DESC;
+    SUM(fs.total_amount) AS revenue
+FROM fact_sales fs
+JOIN dim_date d
+    ON fs.date_key = d.date_key
+JOIN dim_customer c
+    ON fs.customer_key = c.customer_key
+JOIN dim_product p
+    ON fs.product_key = p.product_key
+JOIN dim_channel ch
+    ON fs.channel_key = ch.channel_key
+WHERE fs.is_returned = FALSE  -- nur echte Verkäufe
+GROUP BY
+    d.year,
+    d.month,
+    ch.channel_name,
+    p.product_name,
+    c.customer_segment
+ORDER BY
+    d.year,
+    d.month,
+    ch.channel_name,
+    revenue DESC;
 ```
 
 ### Frage 2: Retourenquote nach Produkt/Kanal/Zeit
 
 ```sql
-SELECT 
-    p.product_name,
-    ch.channel_name,
+WITH sales AS (
+    SELECT
+        fs.product_key,
+        fs.channel_key,
+        fs.date_key,
+        SUM(fs.quantity) AS qty_total,
+        SUM(CASE WHEN fs.is_returned = TRUE THEN fs.quantity ELSE 0 END) AS qty_returned
+    FROM fact_sales fs
+    GROUP BY
+        fs.product_key,
+        fs.channel_key,
+        fs.date_key
+)
+SELECT
     d.year,
-    d.quarter,
-    COUNT(*) as total_sales,
-    SUM(CASE WHEN f.is_returned THEN 1 ELSE 0 END) as returns,
-    ROUND(SUM(CASE WHEN f.is_returned THEN 1 ELSE 0 END) * 100.0 / COUNT(*), 2) as return_rate_pct
-FROM fact_sales f
-JOIN dim_product p ON f.product_key = p.product_key
-JOIN dim_channel ch ON f.channel_key = ch.channel_key
-JOIN dim_date d ON f.date_key = d.date_key
-GROUP BY p.product_name, ch.channel_name, d.year, d.quarter
-ORDER BY return_rate_pct DESC;
+    d.month,
+    ch.channel_name,
+    p.product_name,
+    qty_total,
+    qty_returned,
+    CASE 
+        WHEN qty_total = 0 THEN 0
+        ELSE qty_returned * 1.0 / qty_total
+    END AS return_rate
+FROM sales s
+JOIN dim_date d
+    ON s.date_key = d.date_key
+JOIN dim_product p
+    ON s.product_key = p.product_key
+JOIN dim_channel ch
+    ON s.channel_key = ch.channel_key
+ORDER BY
+    d.year,
+    d.month,
+    ch.channel_name,
+    p.product_name;
 ```
 
 ### Frage 3: Neukundenentwicklung pro Monat
@@ -177,20 +211,28 @@ ORDER BY d.year, d.month;
 
 ### Frage 4: Top-Produkte nach Umsatz/Menge/Retouren
 
-```sql
--- Top 10 nach Umsatz
-SELECT 
+``` sql
+WITH agg AS (
+    SELECT
+        fs.product_key,
+        SUM(CASE WHEN fs.is_returned = FALSE THEN fs.total_amount ELSE 0 END) AS revenue,
+        SUM(CASE WHEN fs.is_returned = FALSE THEN fs.quantity ELSE 0 END) AS qty_sold,
+        SUM(CASE WHEN fs.is_returned = TRUE THEN fs.quantity ELSE 0 END) AS qty_returned
+    FROM fact_sales fs
+    GROUP BY fs.product_key
+)
+SELECT
     p.product_name,
-    p.brand,
     p.category,
-    SUM(f.total_amount) as total_revenue,
-    SUM(f.quantity) as total_quantity,
-    SUM(CASE WHEN f.is_returned THEN 1 ELSE 0 END) as total_returns
-FROM fact_sales f
-JOIN dim_product p ON f.product_key = p.product_key
-GROUP BY p.product_name, p.brand, p.category
-ORDER BY total_revenue DESC
-LIMIT 10;
+    p.subcategory,
+    a.revenue,
+    a.qty_sold,
+    a.qty_returned
+FROM agg a
+JOIN dim_product p
+    ON a.product_key = p.product_key
+ORDER BY
+    a.revenue DESC;
 ```
 
 ---
