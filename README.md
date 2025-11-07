@@ -16,7 +16,7 @@
 | 📊 Business-SQL-Queries | [`data_warehouse/BUSINESS_QUERIES`](https://github.com/Fonks/erp-sales-analytics-pipeline/tree/main/data_warehouse#business-questions--queries)|
 | 📸 Ergebnisse & Visualisierungen | [`result_documentation/`](result_documentation/) |
 | 🚀 Projekt starten | [Getting Started](#getting-started) |
-| 🇬🇧 English Version | [README.md](README.md) |
+| 🇬🇧 English Version | [README_eng.md](README_eng.md) |
 
 ---
 
