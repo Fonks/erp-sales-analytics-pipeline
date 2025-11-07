@@ -5,53 +5,53 @@
 ## 📋 PHASE 1: Projekt-Setup & Infrastruktur
 **🎯 Ziel:** Professionelle Grundstruktur schaffen
 
-### Step 1.1: GitHub Repository & Ordnerstruktur
+### Step 1.1: GitHub Repository & Ordnerstruktur ✅ DONE
 - Repository anlegen mit README  
 - Komplette Ordnerstruktur erstellen  
 - `.gitignore` für Python/Data-Projekte  
 - Erste `README.md` mit Projekt-Übersicht  
 
-### Step 1.2: Docker Setup
+### Step 1.2: Docker Setup ✅ DONE
 - `Dockerfile` für PySpark-Umgebung  
 - `docker-compose.yml` (PySpark + Streamlit)  
 - Requirements-Management (`requirements.txt`)  
 
 ---
 
-## 📊 PHASE 2: Data Exploration & Quality
+## 📊 PHASE 2: Data Exploration & Quality ✅ DONE
 **🎯 Ziel:** Daten verstehen und qualitätssichern
 
-### Step 2.1: Explorative Datenanalyse (EDA)
+### Step 2.1: Explorative Datenanalyse (EDA) ✅ DONE
 - Parquet-Dateien laden und inspizieren  
 - Datenqualitätsprobleme identifizieren  
 - Statistiken & erste Visualisierungen  
 - EDA-Notebook dokumentieren  
 
-### Step 2.2: Data Cleaning Pipeline
+### Step 2.2: Data Cleaning Pipeline ✅ DONE
 - Duplikate entfernen  
 - Missing Values behandeln  
 - NLP: Kategorie/Marke aus Freitext extrahieren  
 - Datentyp-Konvertierung  
 - Bereinigte Parquets speichern  
 
-### Step 2.3: Data Quality Framework
+### Step 2.3: Data Quality Framework ✅ DONE
 - 5–8 Quality Checks implementieren (z. B. *Great Expectations*)  
-- Data Contract Schema (JSON) erstellen  
-- Automatische Validierung einbauen  
-- Quality Report generieren  
+- Data Contract Schema (JSON) erstellen  ✅ DONE
+- Automatische Validierung einbauen  ✅ DONE
+- Quality Report generieren  ✅ DONE
 
 ---
 
-## 🏗️ PHASE 3: Data Warehouse Modellierung <- MOMENTAN HIER
+## 🏗️ PHASE 3: Data Warehouse Modellierung 
 **🎯 Ziel:** Star Schema für Analytics
 
-### Step 3.1: Dimensional Modeling
+### Step 3.1: Dimensional Modeling ✅ DONE
 - Star Schema Design (Kimball)  
 - ERD-Diagramm erstellen  
 - Dimensionstabellen definieren  
 - Faktentabelle(n) designen  
 
-### Step 3.2: ETL Pipeline (PySpark)
+### Step 3.2: ETL Pipeline (PySpark) <- 🚧 MOMENTAN HIER WIP! 
 - Delta Lake Setup  
 - Inkrementelle Load-Logik  
 - Dimension & Fact Tables erstellen  
