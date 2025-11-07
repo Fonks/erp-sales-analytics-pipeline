@@ -144,9 +144,9 @@ fact_sales.write.parquet("warehouse/fact_sales")
 
 ---
 
-## 📈 Business Queries
+##  BUSINESS QUESTIONS → QUERIES
 
-### Beispiel 1: Umsatz nach Kanal, Produkt, Zeit, Kundensegment
+### Frage 1: Umsatz nach Kanal, Produkt, Zeit, Kundensegment
 
 ```sql
 SELECT
@@ -179,7 +179,7 @@ ORDER BY
     revenue DESC;
 ```
 
-### Beispiel 2: Retourenquote nach Produkt/Kanal/Zeit
+### Frage 2: Retourenquote nach Produkt/Kanal/Zeit
 
 ```sql
 WITH sales AS (
@@ -219,32 +219,23 @@ ORDER BY
     ch.channel_name,
     p.product_name;
 ```
-### Beispiel 3: Neukundenentwicklung pro Monat
+
+### Frage 3: Neukundenentwicklung pro Monat
 
 ```sql
--- 1. Für jeden Kunden das erste Kaufdatum bestimmen
-WITH first_purchase AS (
-    SELECT
-        fs.customer_key,
-        MIN(fs.date_key) AS first_date_key
-    FROM fact_sales fs
-    GROUP BY fs.customer_key
-)
-SELECT
+SELECT 
     d.year,
     d.month,
-    COUNT(*) AS new_customers
-FROM first_purchase fp
-JOIN dim_date d
-    ON fp.first_date_key = d.date_key
-GROUP BY
-    d.year,
-    d.month
-ORDER BY
-    d.year,
-    d.month;
+    d.month_name,
+    COUNT(DISTINCT c.customer_key) as new_customers
+FROM dim_customer c
+JOIN dim_date d ON DATE_FORMAT(c.registration_date, 'yyyyMM') = DATE_FORMAT(d.full_date, 'yyyyMM')
+GROUP BY d.year, d.month, d.month_name
+ORDER BY d.year, d.month;
 ```
-### Beispiel 4: Neukundenentwicklung pro Monat
+
+
+### Frage 4: Top-Produkte nach Umsatz/Menge/Retouren
 
 ``` sql
 WITH agg AS (
