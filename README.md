@@ -19,6 +19,7 @@ Umwandlung unübersichtlicher, realer E-Commerce-Daten in eine zuverlässige Ana
 | Notebook 1 | EDA | Verstehen, Analysieren |
 | Notebook 2 | Cleaning | Bereinigen, Extrahieren, Speichern |
 | Notebook 3 | Quality | Validieren, Checks, Reports |
+| Notebook 4 | Warehousing | Tabellenaufbereitung für Business-Fragen|
 
 ## 📋 Inhaltsverzeichnis
 
