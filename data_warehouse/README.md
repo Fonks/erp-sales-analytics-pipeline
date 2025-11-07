@@ -4,13 +4,13 @@
 
 ---
 
-## 📋 Übersicht
+## Übersicht
 
 In Phase 3 wurde ein **Star Schema Data Warehouse** implementiert, um analytische Anfragen für das Shoebadoo ERP-System zu ermöglichen.
 
-### 🎯 Projektziel
+### Projektziel
 
-Ermögliche Business-Analysten die Beantwortung folgender Fragen:
+Ermögliche Business-Analysten die Beantwortung folgender Fragen (SQL Queries unten):
 - ✅ Umsatz nach Kanal, Produkt, Zeit, Kundensegment
 - ✅ Retourenquote nach Produkt/Kanal/Zeit
 - ✅ Neukundenentwicklung pro Monat
@@ -18,7 +18,7 @@ Ermögliche Business-Analysten die Beantwortung folgender Fragen:
 
 ---
 
-## 🏗️ Architektur
+## Architektur
 
 ### Star Schema Design
 
@@ -146,35 +146,130 @@ fact_sales.write.parquet("warehouse/fact_sales")
 
 ## 📈 Business Queries
 
-### Beispiel 1: Umsatz nach Kanal und Quartal
+### Beispiel 1: Umsatz nach Kanal, Produkt, Zeit, Kundensegment
 
 ```sql
-SELECT 
+SELECT
     d.year,
-    d.quarter,
-    c.channel_name,
-    SUM(f.total_amount) as revenue,
-    SUM(f.quantity) as units_sold
-FROM fact_sales f
-JOIN dim_date d ON f.date_key = d.date_key
-JOIN dim_channel c ON f.channel_key = c.channel_key
-GROUP BY d.year, d.quarter, c.channel_name
-ORDER BY revenue DESC;
+    d.month,
+    ch.channel_name,
+    p.product_name,
+    c.customer_segment,
+    SUM(fs.total_amount) AS revenue
+FROM fact_sales fs
+JOIN dim_date d
+    ON fs.date_key = d.date_key
+JOIN dim_customer c
+    ON fs.customer_key = c.customer_key
+JOIN dim_product p
+    ON fs.product_key = p.product_key
+JOIN dim_channel ch
+    ON fs.channel_key = ch.channel_key
+WHERE fs.is_returned = FALSE  -- nur echte Verkäufe
+GROUP BY
+    d.year,
+    d.month,
+    ch.channel_name,
+    p.product_name,
+    c.customer_segment
+ORDER BY
+    d.year,
+    d.month,
+    ch.channel_name,
+    revenue DESC;
 ```
 
-### Beispiel 2: Retourenquote pro Produktkategorie
+### Beispiel 2: Retourenquote nach Produkt/Kanal/Zeit
 
 ```sql
-SELECT 
-    p.category,
-    COUNT(*) as total_sales,
-    SUM(CASE WHEN f.is_returned THEN 1 ELSE 0 END) as returns,
-    ROUND(returns * 100.0 / total_sales, 2) as return_rate_pct
-FROM fact_sales f
-JOIN dim_product p ON f.product_key = p.product_key
-GROUP BY p.category
-ORDER BY return_rate_pct DESC;
+WITH sales AS (
+    SELECT
+        fs.product_key,
+        fs.channel_key,
+        fs.date_key,
+        SUM(fs.quantity) AS qty_total,
+        SUM(CASE WHEN fs.is_returned = TRUE THEN fs.quantity ELSE 0 END) AS qty_returned
+    FROM fact_sales fs
+    GROUP BY
+        fs.product_key,
+        fs.channel_key,
+        fs.date_key
+)
+SELECT
+    d.year,
+    d.month,
+    ch.channel_name,
+    p.product_name,
+    qty_total,
+    qty_returned,
+    CASE 
+        WHEN qty_total = 0 THEN 0
+        ELSE qty_returned * 1.0 / qty_total
+    END AS return_rate
+FROM sales s
+JOIN dim_date d
+    ON s.date_key = d.date_key
+JOIN dim_product p
+    ON s.product_key = p.product_key
+JOIN dim_channel ch
+    ON s.channel_key = ch.channel_key
+ORDER BY
+    d.year,
+    d.month,
+    ch.channel_name,
+    p.product_name;
 ```
+### Beispiel 3: Neukundenentwicklung pro Monat
+
+```sql
+-- 1. Für jeden Kunden das erste Kaufdatum bestimmen
+WITH first_purchase AS (
+    SELECT
+        fs.customer_key,
+        MIN(fs.date_key) AS first_date_key
+    FROM fact_sales fs
+    GROUP BY fs.customer_key
+)
+SELECT
+    d.year,
+    d.month,
+    COUNT(*) AS new_customers
+FROM first_purchase fp
+JOIN dim_date d
+    ON fp.first_date_key = d.date_key
+GROUP BY
+    d.year,
+    d.month
+ORDER BY
+    d.year,
+    d.month;
+```
+### Beispiel 4: Neukundenentwicklung pro Monat
+
+``` sql
+WITH agg AS (
+    SELECT
+        fs.product_key,
+        SUM(CASE WHEN fs.is_returned = FALSE THEN fs.total_amount ELSE 0 END) AS revenue,
+        SUM(CASE WHEN fs.is_returned = FALSE THEN fs.quantity ELSE 0 END) AS qty_sold,
+        SUM(CASE WHEN fs.is_returned = TRUE THEN fs.quantity ELSE 0 END) AS qty_returned
+    FROM fact_sales fs
+    GROUP BY fs.product_key
+)
+SELECT
+    p.product_name,
+    p.category,
+    p.subcategory,
+    a.revenue,
+    a.qty_sold,
+    a.qty_returned
+FROM agg a
+JOIN dim_product p
+    ON a.product_key = p.product_key
+ORDER BY
+    a.revenue DESC;
+```
+
 
 ---
 
@@ -197,24 +292,6 @@ assert fact_sales.join(dim_date, "date_key", "left_anti").count() == 0
 
 ---
 
-## 📁 Projektstruktur
-
-```
-phase3_star_schema/
-├── 04_star_schema_creation.ipynb   # PySpark Implementation
-├── PHASE3_STAR_SCHEMA_DESIGN.md    # Design Documentation
-├── star_schema_diagram.mermaid      # ERD Diagram
-├── STAR_SCHEMA_CHEATSHEET.md        # Quick Reference
-└── data/
-    └── warehouse/
-        ├── dim_date/
-        ├── dim_customer/
-        ├── dim_product/
-        ├── dim_channel/
-        └── fact_sales/
-```
-
----
 
 ## 🎓 Key Learnings
 
