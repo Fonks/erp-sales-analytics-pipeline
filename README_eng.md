@@ -241,6 +241,28 @@ While the current dataset (~437K records) could be handled by Pandas, this proje
 
 ---
 
+## 🤖 Development Transparency
+
+### AI-Assisted Documentation
+This project demonstrates **authentic technical skills** while leveraging AI as a productivity tool:
+
+**✅ What I coded myself:**
+- **All PySpark data pipelines** - ETL logic, transformations, Delta Lake operations
+- **Data quality framework** - validation rules, Great Expectations suite
+- **SQL queries** - business analytics, star schema implementation
+- **Docker infrastructure** - container setup, orchestration
+- **Data modeling** - schema design, dimensional modeling decisions
+
+**🛠️ How I used AI (Claude):**
+- **Documentation polish** - README formatting, grammar, professional tone
+- **Learning resource** - explaining PySpark concepts, debugging guidance
+
+**Why this matters:** Modern data engineers use AI tools to accelerate work, but the core technical skills, problem-solving, and domain knowledge are mine. This README itself was created with AI assistance to communicate my work professionally.
+
+---
+
+
+
 ## 👤 Author
 
 **Phuong Minh Nguyen**  
