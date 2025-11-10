@@ -255,6 +255,28 @@ Detaillierte Phasen und Fortschritt findest du im **[Projektplan](01_Projektplan
 
 ---
 
+## 🤖 Transparenz in der Entwicklung
+
+### KI-unterstützte Dokumentation
+Dieses Projekt demonstriert **authentische technische Fähigkeiten**, während KI als Produktivitäts-Tool genutzt wird:
+
+**✅ Was ich selbst programmiert habe:**
+- **Alle PySpark-Data-Pipelines** - ETL-Logik, Transformationen, Delta-Lake-Operationen
+- **Data-Quality-Framework** - Validierungsregeln, Great-Expectations-Suite
+- **SQL-Queries** - Business-Analytics, Star-Schema-Implementierung
+- **Docker-Infrastruktur** - Container-Setup, Orchestrierung
+- **Datenmodellierung** - Schema-Design, Dimensional-Modeling-Entscheidungen
+
+**🛠️ Wie ich KI (Claude) genutzt habe:**
+- **Dokumentation aufpolieren** - README-Formatierung, Grammatik, professioneller Ton
+- **Lernressource** - PySpark-Konzepte erklären, Debugging-Hilfe
+
+**Warum das wichtig ist:** Moderne Data Engineers nutzen KI-Tools, um ihre Arbeit zu beschleunigen, aber die Kern-Skills, das Problem-Solving und das Domain-Wissen sind meine eigenen. 
+Diese README wurde selbst mit KI-Unterstützung erstellt, um meine Arbeit professionell zu kommunizieren.
+
+---
+
+
 ## 👤 Autor
 
 **Phuong Minh Nguyen**  
