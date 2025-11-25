@@ -1,63 +1,96 @@
 erDiagram
-    %% Star Schema für Shoebadoo Sales Analytics
+    fact_sales ||--o{ dim_customers : "customer_key"
+    fact_sales ||--o{ dim_products : "product_key"
+    fact_sales ||--o{ dim_channels : "channel_key"
+    fact_sales ||--o{ dim_date : "order_date_key"
     
-    FACT_SALES {
-        string sale_id PK
-        int date_key FK
-        int customer_key FK
-        int product_key FK
-        int channel_key FK
-        int quantity
-        decimal unit_price
-        decimal total_amount
-        boolean is_returned
+    fact_returns ||--o{ dim_customers : "customer_key"
+    fact_returns ||--o{ dim_products : "product_key"
+    fact_returns ||--o{ dim_channels : "channel_key"
+    fact_returns ||--o{ dim_date : "return_date_key"
+    fact_returns ||--o{ dim_date : "order_date_key"
+
+    fact_sales {
+        BIGINT sale_id PK
+        STRING order_id
+        STRING order_item_id
+        BIGINT customer_key FK
+        BIGINT product_key FK
+        BIGINT channel_key FK
+        INT order_date_key FK
+        INT quantity
+        DECIMAL unit_price
+        DECIMAL total_amount
+        TIMESTAMP created_at
     }
-    
-    DIM_DATE {
-        int date_key PK
-        date full_date
-        int year
-        int quarter
-        int month
-        string month_name
-        int week
-        int day
-        int day_of_week
-        string day_name
-        boolean is_weekend
+
+    fact_returns {
+        BIGINT return_id PK
+        STRING order_id
+        STRING order_item_id
+        BIGINT customer_key FK
+        BIGINT product_key FK
+        BIGINT channel_key FK
+        INT return_date_key FK
+        INT order_date_key FK
+        INT quantity_returned
+        DECIMAL return_amount
+        STRING return_reason
+        TIMESTAMP created_at
     }
-    
-    DIM_CUSTOMER {
-        int customer_key PK
-        string customer_id
-        string customer_name
-        string customer_segment
-        string country
-        string city
-        string postal_code
-        date registration_date
+
+    dim_customers {
+        BIGINT customer_key PK
+        STRING customer_id UK
+        STRING customer_name
+        STRING customer_segment
+        DATE registration_date
+        STRING country
+        STRING city
+        BOOLEAN is_active
+        TIMESTAMP valid_from
+        TIMESTAMP valid_to
+        BOOLEAN is_current
+        TIMESTAMP created_at
     }
-    
-    DIM_PRODUCT {
-        int product_key PK
-        string product_id
-        string product_name
-        string category
-        string subcategory
-        string brand
-        decimal price
-        string color
-        string size
+
+    dim_products {
+        BIGINT product_key PK
+        STRING product_id UK
+        STRING product_name
+        STRING category
+        STRING subcategory
+        STRING brand
+        STRING color
+        STRING size
+        DECIMAL price
+        BOOLEAN is_active
+        TIMESTAMP created_at
     }
-    
-    DIM_CHANNEL {
-        int channel_key PK
-        string channel_id
-        string channel_name
-        string channel_type
+
+    dim_channels {
+        BIGINT channel_key PK
+        STRING channel_id UK
+        STRING channel_name
+        STRING channel_type
+        BOOLEAN is_active
+        TIMESTAMP created_at
     }
-    
-    FACT_SALES ||--o{ DIM_DATE : "date_key"
-    FACT_SALES ||--o{ DIM_CUSTOMER : "customer_key"
-    FACT_SALES ||--o{ DIM_PRODUCT : "product_key"
-    FACT_SALES ||--o{ DIM_CHANNEL : "channel_key"
+
+    dim_date {
+        INT date_key PK
+        DATE full_date
+        INT day_of_week
+        STRING day_name
+        INT day_of_month
+        INT day_of_year
+        INT week_of_year
+        INT month
+        STRING month_name
+        INT quarter
+        INT year
+        BOOLEAN is_weekend
+        BOOLEAN is_holiday
+        INT fiscal_year
+        INT fiscal_quarter
+    }
