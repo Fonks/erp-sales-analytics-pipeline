@@ -4,12 +4,15 @@
 
 ```
                     dim_date
-                        |
-                        |
-    dim_customer ---- FACT_sales ---- dim_product
-                        |
-                        |
-                    dim_channel
+                       |
+                       |
+    dim_customers ---- fact_sales ---- dim_products
+                       |
+                       |
+                  dim_channels
+                       |
+                       |
+                  fact_returns
 ```
 
 ###  Warum Star Schema?
@@ -23,217 +26,265 @@
 
 ---
 
-##  2. FACT TABLE: `fact_sales`
+###  Warum 2 Fact Tables?
 
-**= Die Transaktionen (Sales)**
-
-| Column | Type | Beschreibung | Key Type |
-|--------|------|--------------|----------|
-| `sale_id` | STRING | Eindeutige Sale ID | PRIMARY KEY |
-| `date_key` | INT | Date Surrogate Key (YYYYMMDD) | FOREIGN KEY → dim_date |
-| `customer_key` | INT | Customer Surrogate Key | FOREIGN KEY → dim_customer |
-| `product_key` | INT | Product Surrogate Key | FOREIGN KEY → dim_product |
-| `channel_key` | INT | Channel Surrogate Key | FOREIGN KEY → dim_channel |
-| `quantity` | INT | Anzahl verkaufte Einheiten | MEASURE |
-| `unit_price` | DECIMAL | Preis pro Einheit | MEASURE |
-| `total_amount` | DECIMAL | Gesamtumsatz | MEASURE |
-| `is_returned` | BOOLEAN | Wurde retourniert? | FLAG |
-
-**💡 Tipp:** Nur **Measures** (Zahlen) und **Foreign Keys** in der Fact Table!
+| Grund | Erklärung |
+|-------|-----------|
+| ⏰ **Temporale Integrität** | Sales am Order-Datum, Returns am Return-Datum |
+| 📊 **Grain-Konsistenz** | Unterschiedliche Business Events = unterschiedliche Tables |
+| 🔍 **Analytische Flexibilität** | Return Reasons, Time-to-Return Analysis möglich |
 
 ---
 
-##  3. DIMENSION: `dim_date`
+## Tabellendefinitionen
 
-**= Zeit-Dimensionen (für Zeit-Analysen)**
+### 1. Faktentabelle: `fact_sales`
 
-| Column | Type | Beschreibung |
-|--------|------|--------------|
-| `date_key` | INT | YYYYMMDD (z.B. 20240115) |
-| `full_date` | DATE | Vollständiges Datum |
-| `year` | INT | Jahr (2024) |
-| `quarter` | INT | Quartal (1-4) |
-| `month` | INT | Monat (1-12) |
-| `month_name` | STRING | Monat Name (January) |
-| `week` | INT | Woche (1-52) |
-| `day` | INT | Tag (1-31) |
-| `day_of_week` | INT | Wochentag (1=Montag) |
-| `day_name` | STRING | Wochentag Name (Monday) |
-| `is_weekend` | BOOLEAN | Ist Wochenende? |
+**Zweck:** Speichert alle Verkaufstransaktionen (Grain: eine Zeile pro Bestellposition)
 
-** Nutzen:** "Zeig mir Umsatz pro Quartal" = easy!
+| Spalte | Datentyp | Beschreibung |
+|--------|----------|--------------|
+| `sale_id` | BIGINT | Primary Key (Surrogate Key) |
+| `order_id` | STRING | Business Key der Bestellung |
+| `order_item_id` | STRING | Business Key der Bestellposition |
+| `customer_key` | BIGINT | Foreign Key → dim_customers |
+| `product_key` | BIGINT | Foreign Key → dim_products |
+| `channel_key` | BIGINT | Foreign Key → dim_channels |
+| `order_date_key` | INT | Foreign Key → dim_date (Format: YYYYMMDD) |
+| `quantity` | INT | Verkaufte Menge |
+| `unit_price` | DECIMAL(10,2) | Einzelpreis |
+| `total_amount` | DECIMAL(10,2) | Gesamtumsatz (quantity × unit_price) |
+| `created_at` | TIMESTAMP | ETL Timestamp |
+
+**Grain:** Eine Zeile pro Bestellposition (Order Item)
 
 ---
 
-##  4. DIMENSION: `dim_customer`
+### 2. Faktentabelle: `fact_returns`
 
-**= Kunde-Details**
+**Zweck:** Speichert alle Retourenvorgänge
 
-| Column | Type | Beschreibung |
-|--------|------|--------------|
-| `customer_key` | INT | Surrogate Key (Auto-increment) |
-| `customer_id` | STRING | Original Customer ID |
-| `customer_name` | STRING | Name |
-| `customer_segment` | STRING | Segment (B2B/B2C) |
+| Spalte | Datentyp | Beschreibung |
+|--------|----------|--------------|
+| `return_id` | BIGINT | Primary Key (Surrogate Key) |
+| `order_id` | STRING | Business Key der ursprünglichen Bestellung |
+| `order_item_id` | STRING | Verknüpfung zur Bestellposition |
+| `customer_key` | BIGINT | Foreign Key → dim_customers |
+| `product_key` | BIGINT | Foreign Key → dim_products |
+| `channel_key` | BIGINT | Foreign Key → dim_channels |
+| `return_date_key` | INT | Foreign Key → dim_date |
+| `order_date_key` | INT | Foreign Key → dim_date (ursprüngliches Bestelldatum) |
+| `quantity_returned` | INT | Retournierte Menge |
+| `return_amount` | DECIMAL(10,2) | Erstattungsbetrag |
+| `return_reason` | STRING | Grund der Retoure |
+| `created_at` | TIMESTAMP | ETL Timestamp |
+
+**Grain:** Eine Zeile pro Retourenposition
+
+---
+
+### 3. Dimensionstabelle: `dim_customers`
+
+**Zweck:** Kundenstammdaten mit Segmentierung
+
+| Spalte | Datentyp | Beschreibung |
+|--------|----------|--------------|
+| `customer_key` | BIGINT | Primary Key (Surrogate Key) |
+| `customer_id` | STRING | Business Key (natürliche Kunden-ID) |
+| `customer_name` | STRING | Kundenname |
+| `customer_segment` | STRING | Kundensegment (z.B. "Premium", "Standard", "New") |
+| `registration_date` | DATE | Erstregistrierungsdatum |
 | `country` | STRING | Land |
 | `city` | STRING | Stadt |
-| `postal_code` | STRING | PLZ |
-| `registration_date` | DATE | Registrierungsdatum |
+| `is_active` | BOOLEAN | Aktiv-Status |
+| `valid_from` | TIMESTAMP | SCD Type 2: Gültig ab |
+| `valid_to` | TIMESTAMP | SCD Type 2: Gültig bis |
+| `is_current` | BOOLEAN | SCD Type 2: Aktueller Eintrag? |
+| `created_at` | TIMESTAMP | ETL Timestamp |
 
-** Nutzen:** "Top 10 Kunden nach Segment" = easy!
+**SCD Type:** Type 2 (Historisierung für Kundensegment-Änderungen)
 
 ---
 
-##  5. DIMENSION: `dim_product`
+### 4. Dimensionstabelle: `dim_products`
 
-**= Produkt-Details**
+**Zweck:** Produktstammdaten mit Hierarchien
 
-| Column | Type | Beschreibung |
-|--------|------|--------------|
-| `product_key` | INT | Surrogate Key |
-| `product_id` | STRING | Original Product ID |
-| `product_name` | STRING | Name |
-| `category` | STRING | Kategorie |
+| Spalte | Datentyp | Beschreibung |
+|--------|----------|--------------|
+| `product_key` | BIGINT | Primary Key (Surrogate Key) |
+| `product_id` | STRING | Business Key (SKU) |
+| `product_name` | STRING | Produktname |
+| `category` | STRING | Produktkategorie (z.B. "Sneakers", "Boots") |
 | `subcategory` | STRING | Unterkategorie |
 | `brand` | STRING | Marke |
-| `price` | DECIMAL | Listenpreis |
 | `color` | STRING | Farbe |
 | `size` | STRING | Größe |
+| `price` | DECIMAL(10,2) | Listenpreis |
+| `is_active` | BOOLEAN | Aktiv im Sortiment? |
+| `created_at` | TIMESTAMP | ETL Timestamp |
 
-** Nutzen:** "Umsatz pro Kategorie/Brand" = easy!
-
----
-
-##  6. DIMENSION: `dim_channel`
-
-**= Verkaufskanal**
-
-| Column | Type | Beschreibung |
-|--------|------|--------------|
-| `channel_key` | INT | Surrogate Key |
-| `channel_id` | STRING | Original Channel ID |
-| `channel_name` | STRING | Name (Online/Retail/Wholesale) |
-| `channel_type` | STRING | Typ (Digital/Physical) |
-
-** Nutzen:** "Retourenquote pro Kanal" = easy!
+**Hierarchie:** Brand → Category → Subcategory → Product
 
 ---
 
-##  7. BUSINESS QUESTIONS → QUERIES
+### 5. Dimensionstabelle: `dim_channels`
 
-### Frage 1: Umsatz nach Kanal, Produkt, Zeit, Kundensegment
+**Zweck:** Vertriebskanäle
 
-```sql
-SELECT
-    d.year,
-    d.month,
-    ch.channel_name,
-    p.product_name,
-    c.customer_segment,
-    SUM(fs.total_amount) AS revenue
-FROM fact_sales fs
-JOIN dim_date d
-    ON fs.date_key = d.date_key
-JOIN dim_customer c
-    ON fs.customer_key = c.customer_key
-JOIN dim_product p
-    ON fs.product_key = p.product_key
-JOIN dim_channel ch
-    ON fs.channel_key = ch.channel_key
-WHERE fs.is_returned = FALSE  -- nur echte Verkäufe
-GROUP BY
-    d.year,
-    d.month,
-    ch.channel_name,
-    p.product_name,
-    c.customer_segment
-ORDER BY
-    d.year,
-    d.month,
-    ch.channel_name,
-    revenue DESC;
-```
+| Spalte | Datentyp | Beschreibung |
+|--------|----------|--------------|
+| `channel_key` | BIGINT | Primary Key (Surrogate Key) |
+| `channel_id` | STRING | Business Key |
+| `channel_name` | STRING | Kanalname (z.B. "Online Shop", "Retail Store") |
+| `channel_type` | STRING | Kanaltyp (z.B. "E-Commerce", "Brick & Mortar") |
+| `is_active` | BOOLEAN | Aktiv-Status |
+| `created_at` | TIMESTAMP | ETL Timestamp |
 
-### Frage 2: Retourenquote nach Produkt/Kanal/Zeit
+---
 
-```sql
-WITH sales AS (
-    SELECT
-        fs.product_key,
-        fs.channel_key,
-        fs.date_key,
-        SUM(fs.quantity) AS qty_total,
-        SUM(CASE WHEN fs.is_returned = TRUE THEN fs.quantity ELSE 0 END) AS qty_returned
-    FROM fact_sales fs
-    GROUP BY
-        fs.product_key,
-        fs.channel_key,
-        fs.date_key
-)
-SELECT
-    d.year,
-    d.month,
-    ch.channel_name,
-    p.product_name,
-    qty_total,
-    qty_returned,
-    CASE 
-        WHEN qty_total = 0 THEN 0
-        ELSE qty_returned * 1.0 / qty_total
-    END AS return_rate
-FROM sales s
-JOIN dim_date d
-    ON s.date_key = d.date_key
-JOIN dim_product p
-    ON s.product_key = p.product_key
-JOIN dim_channel ch
-    ON s.channel_key = ch.channel_key
-ORDER BY
-    d.year,
-    d.month,
-    ch.channel_name,
-    p.product_name;
-```
+### 6. Dimensionstabelle: `dim_date`
 
-### Frage 3: Neukundenentwicklung pro Monat
+**Zweck:** Zeit-Dimension mit vorberechneten Attributen
+
+| Spalte | Datentyp | Beschreibung |
+|--------|----------|--------------|
+| `date_key` | INT | Primary Key (Format: YYYYMMDD) |
+| `full_date` | DATE | Vollständiges Datum |
+| `day_of_week` | INT | Wochentag (1-7) |
+| `day_name` | STRING | Wochentagsname |
+| `day_of_month` | INT | Tag des Monats |
+| `day_of_year` | INT | Tag des Jahres |
+| `week_of_year` | INT | Kalenderwoche |
+| `month` | INT | Monat (1-12) |
+| `month_name` | STRING | Monatsname |
+| `quarter` | INT | Quartal (1-4) |
+| `year` | INT | Jahr |
+| `is_weekend` | BOOLEAN | Wochenende? |
+| `is_holiday` | BOOLEAN | Feiertag? |
+| `fiscal_year` | INT | Geschäftsjahr |
+| `fiscal_quarter` | INT | Geschäftsquartal |
+
+---
+
+## Beantwortung der Business-Fragen
+
+### 1. **Umsatz nach Kanal, Produkt, Zeit, Kundensegment**
 
 ```sql
 SELECT 
     d.year,
-    d.month,
     d.month_name,
-    COUNT(DISTINCT c.customer_key) as new_customers
-FROM dim_customer c
-JOIN dim_date d ON DATE_FORMAT(c.registration_date, 'yyyyMM') = DATE_FORMAT(d.full_date, 'yyyyMM')
-GROUP BY d.year, d.month, d.month_name
-ORDER BY d.year, d.month;
-```
-
-### Frage 4: Top-Produkte nach Umsatz/Menge/Retouren
-
-``` sql
-WITH agg AS (
-    SELECT
-        fs.product_key,
-        SUM(CASE WHEN fs.is_returned = FALSE THEN fs.total_amount ELSE 0 END) AS revenue,
-        SUM(CASE WHEN fs.is_returned = FALSE THEN fs.quantity ELSE 0 END) AS qty_sold,
-        SUM(CASE WHEN fs.is_returned = TRUE THEN fs.quantity ELSE 0 END) AS qty_returned
-    FROM fact_sales fs
-    GROUP BY fs.product_key
-)
-SELECT
+    c.channel_name,
     p.product_name,
     p.category,
-    p.subcategory,
-    a.revenue,
-    a.qty_sold,
-    a.qty_returned
-FROM agg a
-JOIN dim_product p
-    ON a.product_key = p.product_key
-ORDER BY
-    a.revenue DESC;
+    cu.customer_segment,
+    SUM(f.total_amount) AS total_revenue,
+    SUM(f.quantity) AS total_quantity
+FROM fact_sales f
+JOIN dim_date d ON f.order_date_key = d.date_key
+JOIN dim_channels c ON f.channel_key = c.channel_key
+JOIN dim_products p ON f.product_key = p.product_key
+JOIN dim_customers cu ON f.customer_key = cu.customer_key
+WHERE cu.is_current = TRUE
+GROUP BY d.year, d.month_name, c.channel_name, p.product_name, p.category, cu.customer_segment
+ORDER BY total_revenue DESC;
 ```
+
+---
+
+### 2. **Retourenquote nach Produkt/Kanal/Zeit**
+
+```sql
+WITH sales AS (
+    SELECT 
+        product_key,
+        channel_key,
+        order_date_key,
+        SUM(quantity) AS sold_quantity,
+        SUM(total_amount) AS sold_amount
+    FROM fact_sales
+    GROUP BY product_key, channel_key, order_date_key
+),
+returns AS (
+    SELECT 
+        product_key,
+        channel_key,
+        order_date_key,
+        SUM(quantity_returned) AS returned_quantity,
+        SUM(return_amount) AS returned_amount
+    FROM fact_returns
+    GROUP BY product_key, channel_key, order_date_key
+)
+SELECT 
+    d.year,
+    d.month_name,
+    c.channel_name,
+    p.product_name,
+    p.category,
+    COALESCE(s.sold_quantity, 0) AS sold_quantity,
+    COALESCE(r.returned_quantity, 0) AS returned_quantity,
+    ROUND(COALESCE(r.returned_quantity, 0) * 100.0 / NULLIF(s.sold_quantity, 0), 2) AS return_rate_percent
+FROM sales s
+FULL OUTER JOIN returns r 
+    ON s.product_key = r.product_key 
+    AND s.channel_key = r.channel_key 
+    AND s.order_date_key = r.order_date_key
+JOIN dim_date d ON COALESCE(s.order_date_key, r.order_date_key) = d.date_key
+JOIN dim_channels c ON COALESCE(s.channel_key, r.channel_key) = c.channel_key
+JOIN dim_products p ON COALESCE(s.product_key, r.product_key) = p.product_key
+ORDER BY return_rate_percent DESC;
+```
+
+---
+
+### 3. **Neukundenentwicklung pro Monat**
+
+```sql
+SELECT 
+    YEAR(c.registration_date) AS year,
+    MONTH(c.registration_date) AS month,
+    DATE_FORMAT(c.registration_date, '%Y-%m') AS year_month,
+    COUNT(DISTINCT c.customer_key) AS new_customers
+FROM dim_customers c
+WHERE c.is_current = TRUE
+GROUP BY YEAR(c.registration_date), MONTH(c.registration_date), DATE_FORMAT(c.registration_date, '%Y-%m')
+ORDER BY year, month;
+```
+
+---
+
+### 4. **Top-Produkte nach Umsatz/Menge/Retouren**
+
+**Top-Produkte nach Umsatz:**
+```sql
+SELECT 
+    p.product_name,
+    p.category,
+    p.brand,
+    SUM(f.total_amount) AS total_revenue,
+    SUM(f.quantity) AS total_quantity
+FROM fact_sales f
+JOIN dim_products p ON f.product_key = p.product_key
+GROUP BY p.product_name, p.category, p.brand
+ORDER BY total_revenue DESC
+LIMIT 10;
+```
+
+**Top-Produkte nach Retouren:**
+```sql
+SELECT 
+    p.product_name,
+    p.category,
+    SUM(r.quantity_returned) AS total_returns,
+    SUM(r.return_amount) AS total_return_amount
+FROM fact_returns r
+JOIN dim_products p ON r.product_key = p.product_key
+GROUP BY p.product_name, p.category
+ORDER BY total_returns DESC
+LIMIT 10;
+```
+
 
 ---
 
@@ -241,10 +292,21 @@ ORDER BY
 
 ### Was haben wir designed?
 
-1.  **1 Fact Table** (fact_sales) mit Measures
-2.  **4 Dimension Tables** (date, customer, product, channel)
-3.  **Surrogate Keys** für Performance
-4.  **Business Questions** sind beantwortbar
+1.  **2 Fact Tables** (fact_sales + fact_returns) mit unterschiedlichen Grains
+2.  **4 Dimension Tables** (date, customer, product, channel) - shared zwischen beiden Facts
+3.  **Surrogate Keys** für Performance (BIGINT)
+4.  **Alle Business Questions** sind beantwortbar
+5.  **Zusätzliche Analysen** durch temporale Trennung möglich
+
+### Design-Entscheidungen
+
+| Entscheidung | Begründung |
+|--------------|------------|
+| Separate fact_returns | Temporale Integrität, unterschiedlicher Grain |
+| Shared Dimensions | Konsistenz, keine Duplizierung |
+| SCD Type 2 für Kunden | Historisierung von Segment-Änderungen |
+| Date Key als INT | Performance, einfache Joins |
+| BIGINT für Keys | Skalierbarkeit für Production |
 
 ### Nächster Schritt: Implementation in PySpark!
 
@@ -252,17 +314,48 @@ ORDER BY
 
 ---
 
-##  BEGRIFFE ERKLÄRT
+##  10. BEGRIFFE ERKLÄRT
 
 | Begriff | Einfach erklärt |
 |---------|-----------------|
-| **Fact Table** | Die Transaktionen/Events (Sales, Orders) |
+| **Fact Table** | Die Transaktionen/Events (Sales, Returns) |
 | **Dimension Table** | Die Details/Attribute (Customer, Product) |
 | **Surrogate Key** | Auto-increment ID (1, 2, 3...) statt natürlicher IDs |
 | **Measure** | Zahlen zum Aggregieren (SUM, AVG, COUNT) |
-| **Grain** | Detaillierungsgrad (hier: 1 Zeile = 1 Sale) |
-| **Star Schema** | Fact in der Mitte, Dimensions drumherum |
+| **Grain** | Detaillierungsgrad (fact_sales: 1 Zeile = 1 Sale, fact_returns: 1 Zeile = 1 Return) |
+| **Star Schema** | Fact(s) in der Mitte, Dimensions drumherum |
+| **Shared Dimension** | Eine Dimension wird von mehreren Facts genutzt |
+| **SCD Type 2** | Slowly Changing Dimension mit Historisierung |
 
 ---
 
-**🎯 Ziel erreicht:** Alle Business-Fragen können mit simplen JOINs beantwortet werden!
+##  11. VORTEILE DES 2-FACT DESIGNS
+
+### vs. Single Fact mit is_returned Flag
+
+| Aspekt | Single Fact + Flag | 2 Separate Facts |
+|--------|-------------------|------------------|
+| **Temporale Genauigkeit** | ❌ Nur Order-Datum | ✅ Order-Datum + Return-Datum |
+| **Grain-Konsistenz** | ❌ Gemischte Grains | ✅ Klare Grains |
+| **NULL-Werte** | ❌ Viele NULLs bei return_date | ✅ Keine NULLs |
+| **Query-Einfachheit** | ✅ Weniger JOINs für manche Queries | ⚠️ Mehr JOINs für Retourenquote |
+| **Return Reasons** | ⚠️ Kompliziert hinzuzufügen | ✅ Natürlich als Spalte |
+| **Semantik** | ❌ Gemischte Bedeutung | ✅ Klare Trennung |
+| **Time-to-Return Analyse** | ❌ Nicht möglich | ✅ Einfach möglich |
+
+---
+
+**🎯 Ziel erreicht:** 
+- ✅ Alle Business-Fragen beantwortbar
+- ✅ Temporale Integrität gewahrt
+- ✅ Zusätzliche Analysen möglich
+- ✅ Kimball Best Practices befolgt
+
+---
+
+## 👨‍💻 Autor
+
+**Phuong** - Junior Data Engineer  
+Portfolio Project: Shoebadoo Sales Analytics
+
+---
