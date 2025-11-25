@@ -1,4 +1,4 @@
-# 🌟 Phase 3: Star Schema Modellierung
+# 🌟 Phase 3: Star Schema Modellierung WORK IN PROGRESS!!!
 
 > **Kimball Dimensional Modeling** für Shoebadoo Sales Analytics
 
