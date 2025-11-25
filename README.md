@@ -105,7 +105,7 @@ Das Projekt folgt einem **4-Phasen-Ansatz**:
 
 **Was es macht:**
 - Dedupliziert Verkaufsdatensätze
-- Behandelt fehlende Werte mit intelligenten Strategien
+- Behandelt fehlende Werte mit intelligenten Strategien (Quarantine Pattern oder Extrahierung aus "description")
 - Standardisiert Formate (Datum, Währung, Text)
 - Extrahiert Kategorien/Marken aus Produktbeschreibungen mittels NLP
 - Speichert bereinigte Daten in Delta Lake
@@ -114,7 +114,7 @@ Das Projekt folgt einem **4-Phasen-Ansatz**:
 - Native PySpark-Funktionen (20x schneller als UDFs)
 - Bewahrt Data Lineage mit Delta Lake
 - Markiert Unbekannte statt zu löschen (erhält referenzielle Integrität)
-
+- Quarantiert nicht füllbare Null-Werte in eine seperate Tabelle, anstelle zu löschen, um inkrementelles Hinzufügen zu ermöglichen
 ---
 
 ### **Phase 3: Datenqualitäts-Validierung** 
